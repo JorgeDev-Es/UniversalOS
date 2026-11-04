@@ -95,7 +95,7 @@ Item {
         y: K.Kit.tokens.space.xl
         width: parent.width - 2 * K.Kit.tokens.space.xl
 
-        K.TacitText { text: `Rename ${Voice.count(sheet.paths.length, sheet.noun)}`; size: "body"; weight: "medium" }
+        K.UniversalOSText { text: `Rename ${Voice.count(sheet.paths.length, sheet.noun)}`; size: "body"; weight: "medium" }
         Item { width: 1; height: 14 }
         K.Tabs {
             x: -K.Kit.tokens.space.m
@@ -128,15 +128,15 @@ Item {
                 readonly property real half: (parent.width - arrow.implicitWidth - 2 * spacing) / 2
                 height: 30
                 spacing: 10
-                K.TacitText {
+                K.UniversalOSText {
                     anchors.verticalCenter: parent.verticalCenter
                     width: change.half
                     text: change.modelData.old
                     ink: "sec"
                     elide: Text.ElideMiddle
                 }
-                K.TacitText { id: arrow; anchors.verticalCenter: parent.verticalCenter; text: "→"; ink: "meta" }
-                K.TacitText {
+                K.UniversalOSText { id: arrow; anchors.verticalCenter: parent.verticalCenter; text: "→"; ink: "meta" }
+                K.UniversalOSText {
                     anchors.verticalCenter: parent.verticalCenter
                     width: change.half
                     text: change.modelData.bad ? `${change.modelData.name || "…"} · ${change.modelData.bad}` : change.modelData.name
@@ -145,7 +145,7 @@ Item {
                 }
             }
         }
-        K.TacitText {
+        K.UniversalOSText {
             visible: sheet.plan.length > 5
             height: 30
             verticalAlignment: Text.AlignVCenter
@@ -162,7 +162,7 @@ Item {
                 width: cancelWord.implicitWidth
                 text: "Cancel"
                 onActivated: sheet.close()
-                K.TacitText { id: cancelWord; visible: false; text: "Cancel" }
+                K.UniversalOSText { id: cancelWord; visible: false; text: "Cancel" }
             }
         }
     }

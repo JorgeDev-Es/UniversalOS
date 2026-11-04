@@ -70,7 +70,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             x: Tacit.space.l
             spacing: Tacit.space.m
-            K.TacitText {
+            K.UniversalOSText {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, notice.maxWidth - 2 * Tacit.space.l - (pill.visible ? pill.width + row.spacing : 0))
                 text: notice.text
@@ -101,7 +101,7 @@ Item {
                     }
                 }
                 K.FocusRing { shown: pill.activeFocus && K.Kit.focusVisible; corner: pillFace.radius }
-                K.TacitText { id: pillWords; anchors.centerIn: parent; text: notice.actionWords; weight: "medium"; ink: "onAccent" }
+                K.UniversalOSText { id: pillWords; anchors.centerIn: parent; text: notice.actionWords; weight: "medium"; ink: "onAccent" }
                 HoverHandler { id: pillHover; cursorShape: Qt.PointingHandCursor }
                 TapHandler { id: pillTap; onTapped: { K.Kit.focusVisible = false; pill.press(); } }
                 Keys.onPressed: event => {

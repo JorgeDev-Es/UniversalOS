@@ -29,7 +29,7 @@ Item {
     readonly property real maxText: 12 * unit - 2 * pad - kind - Tacit.space.s
     readonly property real wash: selected ? Tacit.wash.current : hovered ? Tacit.wash.hover : 0
     readonly property bool showPicture: picture.toString() !== "" && !ghost && thumb.status !== Image.Error
-    K.TacitText { id: measure; visible: false; text: tag.name; size: "fileText"; weight: "medium" }
+    K.UniversalOSText { id: measure; visible: false; text: tag.name; size: "fileText"; weight: "medium" }
     readonly property real textW: Math.min(Math.ceil(measure.implicitWidth), maxText)
     readonly property bool wraps: measure.implicitWidth > maxText
     readonly property real inkW: editing ? Math.max(textW, 8 * unit - 2 * pad - kind - Tacit.space.s) : textW
@@ -79,7 +79,7 @@ Item {
         x: tag.pad - Tacit.space.xs; y: (tag.height - height) / 2; width: tag.kind; height: tag.kind
         source: thumb; maskEnabled: true; maskSource: thumbMask
     }
-    K.TacitText {
+    K.UniversalOSText {
         visible: !tag.editing
         x: tag.ghost ? tag.pad : tag.pad + tag.kind + Tacit.space.s; y: (tag.height - height) / 2; width: tag.textW
         text: tag.name; size: "fileText"; weight: "medium"

@@ -75,7 +75,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: page.t.space.s
                     K.Symbol { anchors.verticalCenter: parent.verticalCenter; text: "warning"; color: page.t.risk }
-                    K.TacitText { text: `Not sent to ${PhoneLink.phoneName}`; ink: "risk" }
+                    K.UniversalOSText { text: `Not sent to ${PhoneLink.phoneName}`; ink: "risk" }
                 }
                 K.WordAction {
                     visible: sr.failed
@@ -116,7 +116,7 @@ Item {
                 width: col.width
                 spacing: page.t.space.l
                 K.SectionHeading { x: -page.t.space.l; text: "Your phone" }
-                K.TacitText {
+                K.UniversalOSText {
                     width: Math.min(560, parent.width)
                     wrapMode: Text.WordWrap
                     ink: "sec"
@@ -131,7 +131,7 @@ Item {
                 spacing: page.t.space.s
                 K.SectionHeading { x: -page.t.space.l; text: "Setting up your phone" }
                 K.Progress { width: parent.width; value: PhoneLink.setupProgress }
-                K.TacitText { text: PhoneLink.setupPhase; ink: "meta" }
+                K.UniversalOSText { text: PhoneLink.setupPhase; ink: "meta" }
             }
             // it did not happen: nothing was changed, and the way to try again
             K.PageState {
@@ -158,7 +158,7 @@ Item {
                     id: way
                     width: col.width - page.side - 2 * page.t.space.xl
                     spacing: page.t.space.l
-                    K.TacitText {
+                    K.UniversalOSText {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         ink: "sec"
@@ -176,8 +176,8 @@ Item {
                                 required property string modelData
                                 required property int index
                                 spacing: page.t.space.m
-                                K.TacitText { width: page.t.space.l; text: String(step.index + 1); ink: "meta"; cut: "numbers" }
-                                K.TacitText { width: way.width - page.t.space.l - page.t.space.m; text: step.modelData; ink: "sec"; wrapMode: Text.WordWrap }
+                                K.UniversalOSText { width: page.t.space.l; text: String(step.index + 1); ink: "meta"; cut: "numbers" }
+                                K.UniversalOSText { width: way.width - page.t.space.l - page.t.space.m; text: step.modelData; ink: "sec"; wrapMode: Text.WordWrap }
                             }
                         }
                     }
@@ -185,7 +185,7 @@ Item {
                     Column {
                         spacing: page.t.space.s
                         K.Progress { width: way.width; going: true }
-                        K.TacitText { text: "Looking for your phone"; ink: "meta" }
+                        K.UniversalOSText { text: "Looking for your phone"; ink: "meta" }
                     }
                 }
                 // the code, dark dots on the paper tile
@@ -226,13 +226,13 @@ Item {
                 visible: PhoneLink.usable && !PhoneLink.paired && PhoneLink.asking !== null
                 width: Math.min(440, col.width)
                 spacing: page.t.space.l
-                K.TacitText {
+                K.UniversalOSText {
                     width: parent.width
                     wrapMode: Text.WordWrap
                     ink: "sec"
                     text: "Connect only if your phone shows the same code." + (page.waitingFiles.length > 0 ? ` ${page.waitingWords} goes right after.` : "")
                 }
-                K.TacitText { text: PhoneLink.codeOf(PhoneLink.asking?.key); size: "headline"; cut: "numbers"; weight: "medium" }
+                K.UniversalOSText { text: PhoneLink.codeOf(PhoneLink.asking?.key); size: "headline"; cut: "numbers"; weight: "medium" }
                 Row {
                     spacing: page.t.space.xl
                     K.Slab {
@@ -259,14 +259,14 @@ Item {
             }
 
             // ---- connected
-            K.TacitText {
+            K.UniversalOSText {
                 visible: PhoneLink.usable && PhoneLink.paired
                 width: col.width
                 wrapMode: Text.WordWrap
                 ink: "sec"
                 text: `Drop a file here, or choose Send to ${PhoneLink.phoneName} on any file.`
             }
-            K.TacitText {
+            K.UniversalOSText {
                 visible: PhoneLink.usable && PhoneLink.paired && !PhoneLink.phoneReachable
                 width: col.width
                 wrapMode: Text.WordWrap

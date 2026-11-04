@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.tacit
-import Tacit.Kit as K
+import UniversalOS.Kit as K
 
 /**
  * The Gallery: the file the keyboard is on, large, and the folder as a strip under it. Left and Right walk the
@@ -82,7 +82,7 @@ Item {
         id: caption
         anchors { left: parent.left; right: parent.right; bottom: strip.top; bottomMargin: 12; leftMargin: 16; rightMargin: 16 }
         spacing: 2
-        K.TacitText {
+        K.UniversalOSText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: gallery.thing?.name ?? ""
@@ -90,7 +90,7 @@ Item {
             size: "body"
             weight: "medium"
         }
-        K.TacitText {
+        K.UniversalOSText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: gallery.facts

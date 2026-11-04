@@ -2,7 +2,7 @@
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 // Tacit.Kit, Tacit.Sand and Tacit.Edit are in /usr/lib/qt6/qml on an install (Qt finds them there); this folder is the
 // owner's own (the kit linked to tacit-kit, the sand built by native/sand/build.sh) and is ignored where it does not exist
-//@ pragma Env QML_IMPORT_PATH=/home/abdul/.local/lib/qml
+//@ pragma Env QML_IMPORT_PATH=/usr/lib/qt6/qml
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
 //@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
 // Remove two slashes below and adjust the value to change the UI scale
@@ -36,33 +36,32 @@ ShellRoot {
     Connections {
         target: Config
         function onReadyChanged() {
-            if (!Config.ready) return
-
+            if (!Config.ready)
+                return;
             if (WM.compositor === "niri") {
-                Config.options.background.lockWall = ""
-                Config.options.overview.enable = false
+                Config.options.background.lockWall = "";
+                Config.options.overview.enable = false;
             }
 
-            if (Config.options.hyprland.autostartApps.enable &&
-                Config.options.hyprland.autostartApps.apps.length > 0) {
-                autostartProc.running = true
+            if (Config.options.hyprland.autostartApps.enable && Config.options.hyprland.autostartApps.apps.length > 0) {
+                autostartProc.running = true;
             }
         }
     }
 
     Component.onCompleted: {
         // the desktop is the one Tacit program that says config.json cannot be read (Config.reportsProblems)
-        Config.reportsProblems = true
-        Battery.suspends = true // the desktop alone suspends on a low battery; the lock and apps load Battery too
-        MaterialThemeLoader.reapplyTheme()
-        Hyprsunset.load()
-        FirstRunExperience.load()
-        ConflictKiller.load()
-        Cliphist.refresh()
-        Wallpapers.load()
-        Updates.load()
+        Config.reportsProblems = true;
+        Battery.suspends = true; // the desktop alone suspends on a low battery; the lock and apps load Battery too
+        MaterialThemeLoader.reapplyTheme();
+        Hyprsunset.load();
+        FirstRunExperience.load();
+        ConflictKiller.load();
+        Cliphist.refresh();
+        Wallpapers.load();
+        Updates.load();
     }
-    
+
     // GlobalStates' shortcuts and IPC, here so only the shell holds them. GlobalStates is also
     // read in the Settings app's process (DateTime and BluetoothAgent watch screenLocked), where
     // they registered a second time: a key press reached both processes, and the wallpaper toggle
@@ -78,10 +77,11 @@ ShellRoot {
         description: "Toggles centered wallpaper"
         onPressed: Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper
     }
+
     IpcHandler {
         target: "background"
         function toggleCenteredWallpaper(): void {
-            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper
+            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper;
         }
     }
 
@@ -98,7 +98,6 @@ ShellRoot {
         // launcher - and no way back but editing JSON from a TTY. A second family means listing
         // it here too, and then only one of them may take the unknown case.
         readonly property var knownFamilies: ["ii"]
-        active: Config.ready && (Config.options.panelFamily === identifier
-            || !knownFamilies.includes(Config.options.panelFamily))
+        active: Config.ready && (Config.options.panelFamily === identifier || !knownFamilies.includes(Config.options.panelFamily))
     }
 }

@@ -15,23 +15,24 @@ Scope {
     readonly property bool hideBarSideFrame: Config.options.bar.cornerStyle === 0
     readonly property string barPosition: {
         if (Config.options.bar.vertical)
-            return Config.options.bar.bottom ? "right" : "left"
-        return Config.options.bar.bottom ? "bottom" : "top"
+            return Config.options.bar.bottom ? "right" : "left";
+        return Config.options.bar.bottom ? "bottom" : "top";
     }
 
     function frameVisibleFor(side) {
-        if (!Config.options.bar.showFrame) return false
+        if (!Config.options.bar.showFrame)
+            return false;
         if (Config.options.bar.cornerStyle === 0 && side === root.barPosition) {
-            return root.centerOnly
+            return root.centerOnly;
         }
-        return true
+        return true;
     }
 
     component FrameCornerWindow: PanelWindow {
         id: cornerPanelWindow
         property var corner
 
-        visible: Config.options.bar.showFrame 
+        visible: Config.options.bar.showFrame
         exclusionMode: ExclusionMode.Ignore
         mask: Region {}
         WlrLayershell.namespace: "quickshell:screenframe-corner"
@@ -81,10 +82,18 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
                 implicitHeight: root.frameThickness
-                anchors { top: true; left: true; right: true }
+                anchors {
+                    top: true
+                    left: true
+                    right: true
+                }
                 mask: Region {}
 
-                Rectangle { anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("top") }
+                Rectangle {
+                    anchors.fill: parent
+                    color: root.frameColor
+                    visible: root.frameVisibleFor("top")
+                }
             }
 
             PanelWindow { // bottom
@@ -97,10 +106,18 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
                 implicitHeight: root.frameThickness
-                anchors { bottom: true; left: true; right: true }
+                anchors {
+                    bottom: true
+                    left: true
+                    right: true
+                }
                 mask: Region {}
 
-                Rectangle { anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("bottom") }
+                Rectangle {
+                    anchors.fill: parent
+                    color: root.frameColor
+                    visible: root.frameVisibleFor("bottom")
+                }
             }
 
             PanelWindow { // left
@@ -113,10 +130,18 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
                 implicitWidth: root.frameThickness
-                anchors { left: true; top: true; bottom: true }
+                anchors {
+                    left: true
+                    top: true
+                    bottom: true
+                }
                 mask: Region {}
 
-                Rectangle { anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("left") }
+                Rectangle {
+                    anchors.fill: parent
+                    color: root.frameColor
+                    visible: root.frameVisibleFor("left")
+                }
             }
 
             PanelWindow { // right
@@ -129,16 +154,36 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
                 implicitWidth: root.frameThickness
-                anchors { right: true; top: true; bottom: true }
+                anchors {
+                    right: true
+                    top: true
+                    bottom: true
+                }
                 mask: Region {}
 
-                Rectangle { anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("right") }
+                Rectangle {
+                    anchors.fill: parent
+                    color: root.frameColor
+                    visible: root.frameVisibleFor("right")
+                }
             }
 
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.TopLeft }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.TopRight }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.BottomLeft }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.BottomRight }
+            FrameCornerWindow {
+                screen: frameGroup.modelData
+                corner: RoundCorner.CornerEnum.TopLeft
+            }
+            FrameCornerWindow {
+                screen: frameGroup.modelData
+                corner: RoundCorner.CornerEnum.TopRight
+            }
+            FrameCornerWindow {
+                screen: frameGroup.modelData
+                corner: RoundCorner.CornerEnum.BottomLeft
+            }
+            FrameCornerWindow {
+                screen: frameGroup.modelData
+                corner: RoundCorner.CornerEnum.BottomRight
+            }
         }
     }
 }

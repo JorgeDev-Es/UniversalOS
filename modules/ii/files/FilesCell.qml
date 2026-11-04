@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
-import Tacit.Kit as K
+import UniversalOS.Kit as K
 
 /**
  * One item in the grid: a picture or a video shows itself (at its own shape, fitted to the cell's frame), anything
@@ -147,7 +147,7 @@ Item {
         anchors.margins: Tacit.space.s
         y: cell.bare ? Math.round(art.height / 2 + 20 * cell.zoom) : art.y + art.height + Tacit.space.s
         spacing: 2
-        K.TacitText {
+        K.UniversalOSText {
             width: parent.width
             visible: cell.bare
             horizontalAlignment: Text.AlignHCenter
