@@ -105,12 +105,12 @@ Item {
 
     Item {
         id: sheet
-        readonly property real fillet: 6
+        readonly property real fillet: Appearance.liquidGlass.enabled ? 0 : 6
         width: root.shown ? root.openWidth : root.closedGeometry.w
         height: root.shown ? 34 + body.implicitHeight : 34
-        property real cornerRadius: root.shown ? 24 : root.closedGeometry.r
+        property real cornerRadius: root.shown ? (Appearance.liquidGlass.enabled ? 30 : 24) : root.closedGeometry.r
         x: (root.width - width) / 2
-        y: Config.options.island.topMargin
+        y: IslandController.effectiveTopMargin
 
         // Open on the notch's spring curve, fold back on its close curve (IslandContent.qml:153-158).
         readonly property int duration: root.shown ? Appearance.animationCurves.expressiveDefaultSpatialDuration : 450
@@ -127,6 +127,7 @@ Item {
 
         DockedRect {
             anchors.fill: parent
+            floating: Appearance.liquidGlass.enabled
             cornerRadius: sheet.cornerRadius
             fillet: sheet.fillet
             color: IslandController.bodyColor

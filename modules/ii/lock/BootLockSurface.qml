@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
 import qs.services
 import qs.modules.common
@@ -149,6 +150,7 @@ MouseArea {
     Item {
         id: notch
         anchors.top: parent.top
+        anchors.topMargin: Appearance.liquidGlass.enabled ? 10 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         readonly property string glyph: Battery.available && Battery.isCharging ? "bolt" : ""
         opacity: root.holdEntrance ? root.entrance : 1
@@ -157,8 +159,9 @@ MouseArea {
         DockedRect {
             anchors.fill: parent
             edge: "top"
-            cornerRadius: 14
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 17 : 14
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
         Row {
@@ -184,19 +187,36 @@ MouseArea {
     // ------------------------------------------------------------ clock, date, now, away
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.22
+        y: parent.height * (Appearance.liquidGlass.enabled ? 0.19 : 0.22)
         spacing: 6
         opacity: root.entrance
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-            text: DateTime.time
-            font.family: Appearance.font.family.numbers
-            font.pixelSize: 96
-            color: Appearance.colors.colOnSurface
+            visible: Appearance.liquidGlass.enabled
+            text: Qt.formatDate(DateTime.clock.date, "dddd d MMMM")
+            font.pixelSize: 19
+            font.weight: Font.Medium
+            color: Tacit.inkSec
         }
         StyledText {
             Layout.alignment: Qt.AlignHCenter
+            text: DateTime.time
+            font.family: Appearance.font.family.numbers
+            font.pixelSize: 96
+            font.weight: Appearance.liquidGlass.enabled ? Font.DemiBold : Font.Normal
+            color: Appearance.liquidGlass.enabled ? ColorUtils.transparentize(Tacit.inkMain, 0.12) : Appearance.colors.colOnSurface
+            layer.enabled: Appearance.liquidGlass.enabled
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Appearance.liquidGlass.shadow
+                shadowBlur: 0.45
+                shadowVerticalOffset: 4
+            }
+        }
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter
+            visible: !Appearance.liquidGlass.enabled
             text: Qt.formatDate(DateTime.clock.date, "dddd d MMMM")
             font.pixelSize: 19
             color: Appearance.colors.colSubtext
@@ -249,16 +269,17 @@ MouseArea {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         width: 420
-        height: 58 + 6
+        height: Appearance.liquidGlass.enabled ? 58 : 58 + 6
         y: 0
-        anchors.bottomMargin: -6 * (1 - root.entrance)
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 24 - 12 * (1 - root.entrance) : -6 * (1 - root.entrance)
         opacity: root.entrance
 
         DockedRect {
             anchors.fill: parent
             edge: "bottom"
-            cornerRadius: 23
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 29 : 23
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
 
@@ -380,26 +401,30 @@ MouseArea {
     // The session panel's discs, in its corner: hover turns them white, exactly as there.
     Item {
         id: powerPanel
+        readonly property int pad: Appearance.liquidGlass.enabled ? 14 : 20
+        readonly property int edgeInset: Appearance.liquidGlass.enabled ? 0 : 6
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        width: 3 * 44 + 2 * 16 + 2 * 20 + 6
-        height: 44 + 2 * 20 + 6
-        anchors.bottomMargin: -12 * (1 - root.entrance)
+        anchors.rightMargin: Appearance.liquidGlass.enabled ? 20 : 0
+        width: 3 * 44 + 2 * 16 + 2 * pad + edgeInset
+        height: 44 + 2 * pad + edgeInset
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 20 - 12 * (1 - root.entrance) : -12 * (1 - root.entrance)
         opacity: root.entrance
 
         DockedRect {
             anchors.fill: parent
             edge: "bottom-right"
-            cornerRadius: Appearance.rounding.verylarge
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 30 : Appearance.rounding.verylarge
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
 
         Row {
             anchors.left: parent.left
             anchors.top: parent.top
-            anchors.leftMargin: 6 + 20
-            anchors.topMargin: 6 + 20
+            anchors.leftMargin: powerPanel.edgeInset + powerPanel.pad
+            anchors.topMargin: powerPanel.edgeInset + powerPanel.pad
             spacing: 16
 
             Disc {
@@ -439,9 +464,14 @@ MouseArea {
         implicitHeight: 44
         padding: 0
         buttonRadius: Appearance.rounding.full
-        colBackground: filled ? Appearance.colors.colPrimary : Appearance.colors.colLayer2
+        border: Appearance.liquidGlass.enabled
+        borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+        colBorder: (filled || hovered) ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
+        colBackground: filled ? Appearance.colors.colPrimary : (Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : Appearance.colors.colLayer2)
         colBackgroundHover: Appearance.colors.colPrimary
         colRipple: Appearance.colors.colPrimaryActive
+        scale: disc.down ? 0.92 : 1.0
+        Behavior on scale { Anim { type: Anim.FastSpatial } }
         releaseAction: () => disc.activated()
         contentItem: MaterialSymbol {
             text: disc.checking ? "progress_activity" : disc.glyph

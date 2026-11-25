@@ -20,6 +20,19 @@ RippleButton {
     implicitHeight: 32
     padding: 0
     buttonRadius: Appearance.rounding.full
+    border: Appearance.liquidGlass.enabled
+    borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+    colBorder: button.toggled ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
+    colBackground: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : "transparent"
+    colBackgroundHover: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillHover : Appearance.colors.colLayer1Hover
+    colBackgroundToggled: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillActive : Appearance.colors.colPrimary
+    colBackgroundToggledHover: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillActiveHover : Appearance.colors.colPrimaryHover
+    scale: button.down ? 0.90 : 1.0
+    Behavior on scale {
+        Anim {
+            type: Anim.FastSpatial
+        }
+    }
     // Previous and next lean the way they go; play and pause settle in when one replaces the other.
     readonly property real lean: button.glyph === "skip_next" ? 3 : (button.glyph === "skip_previous" ? -3 : 0)
     property bool ready: false

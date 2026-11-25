@@ -7,6 +7,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 
 // The menu a right click on a window's top edge opens (WindowBand.menu, asked for by tacit-frame): the screen in small,
 // the places a window can go. The whole card is five places, so nothing has to be aimed at: toward its top the notch
@@ -173,8 +174,15 @@ Scope {
                 // its middle under the hand, so the hand moves the way the drag would; kept on the screen, under the notch
                 x: Math.min(Math.max((menuWindow.m?.x ?? 0) - width / 2, 8), menuWindow.width - width - 8)
                 y: Math.min(Math.max((menuWindow.m?.y ?? 0) - height / 2, 44), menuWindow.height - height - 8)
-                radius: 16
-                color: Appearance.colors.colPanelFrost
+                radius: Appearance.liquidGlass.enabled ? 24 : 16
+                color: Appearance.liquidGlass.enabled ? "transparent" : Appearance.colors.colPanelFrost
+
+                LiquidGlassSurface {
+                    anchors.fill: parent
+                    visible: Appearance.liquidGlass.enabled
+                    radius: card.radius
+                    color: Appearance.colors.colPanelFrost
+                }
                 scale: 0.94
                 opacity: 0
                 focus: true

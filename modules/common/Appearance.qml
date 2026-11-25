@@ -11,6 +11,7 @@ Singleton {
     property QtObject animation
     property QtObject animationCurves
     property QtObject colors
+    property QtObject liquidGlass
     property QtObject rounding
     property QtObject font
     property QtObject icon
@@ -267,7 +268,11 @@ Singleton {
         // Was the palette's private formula; hoisted so the panels stop disagreeing.
         // One step above surfaceContainer: over a page of the same dark tone the frost was
         // invisible and the controls floated. Alpha 0.72 stays above the blur threshold (0.64).
-        property color colPanelFrost: ColorUtils.transparentize(m3colors.m3surfaceContainerHigh, 0.24 * root.seeThroughScale)
+        // With iOS 27 Liquid Glass enabled, surfaces become luminous translucent optical glass
+        // (base alpha 0.66, scaled on bright wallpapers by seeThroughScale).
+        property color colPanelFrost: (Config?.options.appearance.liquidGlass ?? true)
+            ? ColorUtils.transparentize(ColorUtils.mix(m3colors.m3surfaceContainerHigh, m3colors.m3surfaceBright, 0.78), 0.34 * root.seeThroughScale)
+            : ColorUtils.transparentize(m3colors.m3surfaceContainerHigh, 0.24 * root.seeThroughScale)
         property color colSurfaceContainerLow: ColorUtils.solveOverlayColor(m3colors.m3background, m3colors.m3surfaceContainerLow, 1 - root.contentTransparency)
         property color colSurfaceContainer: ColorUtils.solveOverlayColor(m3colors.m3surfaceContainerLow, m3colors.m3surfaceContainer, 1 - root.contentTransparency)
         property color colSurfaceContainerHigh: ColorUtils.solveOverlayColor(m3colors.m3surfaceContainer, m3colors.m3surfaceContainerHigh, 1 - root.contentTransparency)
@@ -296,6 +301,32 @@ Singleton {
         property color colOnErrorContainer: m3colors.m3onErrorContainer
     }
 
+    // iOS 27 Liquid Glass design tokens, derived from the wallpaper palette so light mode,
+    // dark mode, and every wallpaper hue keep specular highlights and refractive depth in harmony.
+    liquidGlass: QtObject {
+        property bool enabled: Config?.options.appearance.liquidGlass ?? true
+        property color tint: colors.colPanelFrost
+        property color tintTop: ColorUtils.transparentize(m3colors.m3surfaceBright, m3colors.darkmode ? 0.80 : 0.58)
+        property color tintBottom: ColorUtils.transparentize(m3colors.m3surfaceContainerLowest, m3colors.darkmode ? 0.72 : 0.88)
+        property color rimPrimary: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.58 : 0.28)
+        property color rimSecondary: ColorUtils.transparentize(m3colors.m3primary, m3colors.darkmode ? 0.72 : 0.55)
+        property color rimCounter: ColorUtils.transparentize(m3colors.m3tertiary, m3colors.darkmode ? 0.80 : 0.65)
+        property color innerGlow: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.88 : 0.72)
+        property color shadow: ColorUtils.transparentize(m3colors.m3shadow, m3colors.darkmode ? 0.58 : 0.78)
+        property color pillFill: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.90 : 0.84)
+        property color pillFillHover: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.83 : 0.76)
+        property color pillFillActive: ColorUtils.transparentize(m3colors.m3primary, m3colors.darkmode ? 0.24 : 0.18)
+        property color pillFillActiveHover: ColorUtils.transparentize(m3colors.m3primary, m3colors.darkmode ? 0.14 : 0.10)
+        property color pillBorder: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.78 : 0.58)
+        property color pillBorderActive: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.55 : 0.35)
+        property color sliderTrack: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.88 : 0.82)
+        property color sliderFill: ColorUtils.transparentize(m3colors.m3onBackground, m3colors.darkmode ? 0.12 : 0.10)
+        property int panelRadius: 30
+        property int cardRadius: 22
+        property int controlRadius: 20
+        property int capsuleRadius: 9999
+    }
+
     rounding: QtObject {
         property int unsharpen: 2
         property int unsharpenmore: 6
@@ -303,14 +334,14 @@ Singleton {
         // The two radii the surfaces draw with no name for them: 10 is the small tile (10 sites),
         // 14 the card and the 28-high pill (17 sites, including the notch's resting corner).
         property int chip: 10
-        property int small: 12
-        property int card: 14
-        property int normal: 17
-        property int large: 23
-        property int verylarge: 30
+        property int small: 14
+        property int card: 18
+        property int normal: 20
+        property int large: 26
+        property int verylarge: 32
         property int full: 9999
         property int screenRounding: large
-        property int windowRounding: 18
+        property int windowRounding: 24
     }
 
     font: QtObject {
@@ -384,8 +415,8 @@ Singleton {
     }
 
     animationCurves: QtObject {
-        readonly property list<real> expressiveFastSpatial: [0.42, 1.67, 0.21, 0.90, 1, 1] // Default, 350ms
-        readonly property list<real> expressiveDefaultSpatial: [0.38, 1.21, 0.22, 1.00, 1, 1] // Default, 500ms
+        readonly property list<real> expressiveFastSpatial: [0.34, 1.48, 0.22, 1.00, 1, 1] // iOS 27 elastic spring, 350ms
+        readonly property list<real> expressiveDefaultSpatial: [0.32, 1.26, 0.22, 1.00, 1, 1] // iOS 27 damped spring, 500ms
         readonly property list<real> expressiveSlowSpatial: [0.39, 1.29, 0.35, 0.98, 1, 1] // Default, 650ms
         readonly property list<real> expressiveEffects: [0.34, 0.80, 0.34, 1.00, 1, 1] // Default, 200ms
         // Fast/slow effects pair, from caelestia plugin/src/Caelestia/Config/tokens.hpp:25,27.

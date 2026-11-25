@@ -80,7 +80,7 @@ Scope {
                 // nothing on the desktop ever reflows because of the notch, and nothing moves
                 // under the pointer.
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: Config.options.island.reservedHeight + Config.options.island.topMargin
+                exclusiveZone: Config.options.island.reservedHeight + IslandController.effectiveTopMargin
 
                 // Top-anchored only (the compositor centres it), at a FIXED size that never
                 // changes: 860 x 540 since the browser's address sheet (820 wide with its shadow,
@@ -94,7 +94,7 @@ Scope {
                     top: true
                 }
                 implicitWidth: 860
-                implicitHeight: 540 + Config.options.island.topMargin
+                implicitHeight: 540 + IslandController.effectiveTopMargin
                 mask: Region {
                     item: islandContent
                     // the sign-in's hole: the page window under it takes the pointer there
@@ -117,7 +117,7 @@ Scope {
                     screenData: islandRoot.screen
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    anchors.topMargin: Config.options.island.topMargin
+                    anchors.topMargin: IslandController.effectiveTopMargin
                 }
             }
         }

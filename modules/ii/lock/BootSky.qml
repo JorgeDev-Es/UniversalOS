@@ -116,7 +116,7 @@ Item {
         readonly property real k: sky.height / 1080
         x: (sky.width - width) / 2 + 13 * k
         y: sky.height * 0.44 - height / 2
-        text: "TACIT"
+        text: "UniversalOS"
         color: "#f3f0ea"
         font.family: "Tacit Sans Display"
         font.pixelSize: Math.round(56 * k)

@@ -428,10 +428,15 @@ Singleton {
     // the sand layer is up (IslandContent): Flow takes the film's notch, the sand behind the time, no words
     property bool sandReady: false
 
+    readonly property real effectiveTopMargin: Appearance.liquidGlass.enabled
+        ? Math.max(Config.options.island.topMargin, 8)
+        : Config.options.island.topMargin
+
     function geometryFor(name) {
+        const lg = Appearance.liquidGlass.enabled;
         // Flow with the sand: the approved film's notch, 150 x 40 with its 17 px corners (sandwind.py's tank)
         if (name === "flow" && root.sandReady)
-            return { "w": 150, "h": 40, "r": 17, "f": 6 };
+            return { "w": 150, "h": 40, "r": lg ? 20 : 17, "f": lg ? 0 : 6 };
         if (name === "open")
             // boring.notch openNotchSize 640x190 with radii 19/24 (sizing/matters.swift:16-18);
             // ours is scaled to the sheet's contents. The cove stays 6 when open: against this
@@ -443,11 +448,11 @@ Singleton {
             // Text being dragged over it keeps the 72px floor: the sheet's "drop to hand this
             // over" line is centred in that body, and in the 12px the rows leave it lands on
             // top of the header seam and the first row instead.
-            return { "w": 560, "h": (root.mediaPresent ? 150 : ((root.openRowsHeight > 0 && !root.textDragOver) ? 12 : 72)) + (root.focusRunning ? 36 : 0) + root.openRowsHeight, "r": 24, "f": 6 };
+            return { "w": 560, "h": (root.mediaPresent ? 150 : ((root.openRowsHeight > 0 && !root.textDragOver) ? 12 : 72)) + (root.focusRunning ? 36 : 0) + root.openRowsHeight, "r": lg ? 30 : 24, "f": lg ? 0 : 6 };
         // an app not answering: the prompt drops out of the notch (Activity v7 mock, state 09)
         if (name === "notAnswering")
-            return { "w": 520, "h": 34, "r": 24, "f": 6 };
-        return { "w": root.centreWidth + 2 * root.wingFor(name), "h": 34, "r": 14, "f": 6 };
+            return { "w": 520, "h": 34, "r": lg ? 26 : 24, "f": lg ? 0 : 6 };
+        return { "w": root.centreWidth + 2 * root.wingFor(name), "h": 34, "r": lg ? 17 : 14, "f": lg ? 0 : 6 };
     }
 
     // ------------------------------------------------------------------ colour

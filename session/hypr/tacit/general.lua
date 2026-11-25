@@ -25,16 +25,16 @@ hl.config({
         }
     },
     decoration = {
-        -- rounding_power 2.0 = true circular corners, matching the island radius language
-        rounding_power = 2.0,
+        -- rounding_power 4.0 = Apple continuous superellipse squircle corners for Liquid Glass
+        rounding_power = 4.0,
 
         dim_inactive = true,
         dim_strength = 0.04,
 
         shadow = {
             enabled = true,
-            range = 18,
-            offset = {0, 3},
+            range = 24,
+            offset = {0, 6},
             render_power = 4   -- Hyprland 0.57 refuses more than 4 (0.56 took 10 unchecked)
         }
     },
@@ -100,19 +100,18 @@ hl.gesture({
 })
 
 -- ---------------------------------------------------------------------------
--- Material 3 Expressive frost.
+-- iOS 27 Liquid Glass optical blur.
 --
--- M3's frosted surfaces are strongly blurred, let colour through, and sit a touch
--- brighter than what is behind them -- that lift is what separates frost from a
--- dark translucent sheet.
+-- Liquid Glass surfaces stay luminous and strongly blurred, letting rich colour
+-- through from behind with crisp brightness lift and minimal noise.
 --
 -- Only the keys the Settings GUI never writes are here; size, passes, enabled and
 -- inactive_opacity live in config.json (see the header) and used to be set twice.
-hl.config({ decoration = { blur = { vibrancy = 0.62 } } })   -- keep colour from behind
-hl.config({ decoration = { blur = { vibrancy_darkness = 0.35 } } })
-hl.config({ decoration = { blur = { brightness = 1.06 } } }) -- the M3 luminosity lift
-hl.config({ decoration = { blur = { contrast = 0.95 } } })
-hl.config({ decoration = { blur = { noise = 0.015 } } })     -- minimal grain, not film grain
+hl.config({ decoration = { blur = { vibrancy = 0.78 } } })   -- keep rich colour from behind
+hl.config({ decoration = { blur = { vibrancy_darkness = 0.25 } } })
+hl.config({ decoration = { blur = { brightness = 1.12 } } }) -- optical glass luminosity lift
+hl.config({ decoration = { blur = { contrast = 1.02 } } })
+hl.config({ decoration = { blur = { noise = 0.01 } } })      -- crisp optical glass, minimal grain
 
 -- Pointer: a macOS-style curve (2026-10-02). Slow moves are slower than 1:1 for precise landing, swipes go further;
 -- output speed = v * (0.6 + 1.6 * (v / 6)^1.2), v in 0.5 steps. Not in shellOverrides' generator, so set here.

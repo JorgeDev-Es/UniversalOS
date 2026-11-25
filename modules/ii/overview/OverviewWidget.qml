@@ -56,8 +56,8 @@ Item {
     readonly property real numeralHeight: 18
     readonly property real numeralGap: 4
     readonly property real bottomPadding: 24
-    readonly property real fillet: 6
-    readonly property real openRadius: 24
+    readonly property real fillet: Appearance.liquidGlass.enabled ? 0 : 6
+    readonly property real openRadius: Appearance.liquidGlass.enabled ? 30 : 24
     readonly property int count: root.workspaceIds.length
     readonly property real maxCardWidth: 224
     readonly property real minCardWidth: 64
@@ -139,13 +139,15 @@ Item {
     readonly property var closedGeometry: IslandController.geometryFor("idle")
 
     implicitWidth: root.fullWidth + 2 * root.fillet
-    implicitHeight: root.fullHeight
+    implicitHeight: root.fullHeight + IslandController.effectiveTopMargin
 
     DockedRect {
         id: sheet
         visible: !root.bodyHidden
         anchors.top: parent.top
+        anchors.topMargin: IslandController.effectiveTopMargin
         anchors.horizontalCenter: parent.horizontalCenter
+        floating: Appearance.liquidGlass.enabled
         width: root.closedGeometry.w + (root.fullWidth - root.closedGeometry.w) * root.openness
         height: root.closedGeometry.h + (root.fullHeight - root.closedGeometry.h) * root.openness
         edge: "top"

@@ -166,9 +166,16 @@ Scope {
                 implicitHeight: menuCol.implicitHeight + 28
                 x: Math.min(Math.max(GlobalStates.desktopMenuX - width / 2, 8), menuWindow.width - width - 8)
                 y: Math.min(Math.max(GlobalStates.desktopMenuY - implicitHeight / 2, 8), menuWindow.height - implicitHeight - 8)
-                radius: Appearance.rounding.verylarge
+                radius: Appearance.liquidGlass.enabled ? 26 : Appearance.rounding.verylarge
                 // near-opaque: the desktop behind is often bright
-                color: ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainer, 0.04)
+                color: Appearance.liquidGlass.enabled ? "transparent" : ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainer, 0.04)
+
+                LiquidGlassSurface {
+                    anchors.fill: parent
+                    visible: Appearance.liquidGlass.enabled
+                    radius: menuCard.radius
+                    color: Appearance.colors.colPanelFrost
+                }
 
                 scale: 0.85
                 opacity: 0

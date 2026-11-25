@@ -84,7 +84,7 @@ Scope {
         // Bottom-right corner, sized to its content (see SidebarRightContent.qml). The window
         // is the body plus one cove on the left and one above (DockedRect corner mode).
         readonly property int cove: 12
-        implicitWidth: sidebarWidth + cove
+        implicitWidth: sidebarWidth + cove + (Appearance.liquidGlass.enabled ? cove : 0)
         // What the panel may never exceed: the screen minus the notch's reserved height. Past it the panel scrolls
         // its own content (SidebarRightContent.qml), because anything above the window's top
         // edge is outside the layer surface, where nothing is drawn and nothing is clickable.
@@ -164,12 +164,15 @@ Scope {
                     id: sidebarContentLoader
                     // The body sits flush in the corner; the cove to its left and the cove
                     // above it are drawn by the DockedRect inside SidebarRightContent.qml.
+                    // In iOS 27 Liquid Glass mode, the panel floats 12px inside the screen edges.
                     active: panelWindow.reallyVisible || (panelWindow.settled && Config?.options.sidebar.keepRightSidebarLoaded)
                     anchors {
                         left: parent.left
                         right: parent.right
                         bottom: parent.bottom
                         leftMargin: panelWindow.cove
+                        rightMargin: Appearance.liquidGlass.enabled ? panelWindow.cove : 0
+                        bottomMargin: Appearance.liquidGlass.enabled ? panelWindow.cove : 0
                     }
                     // No Behavior here: the content animates its own height (the date/calendar
                     // group on the standard curve), and the panel follows it frame by frame. A

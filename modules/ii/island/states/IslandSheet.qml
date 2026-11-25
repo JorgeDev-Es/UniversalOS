@@ -61,8 +61,10 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: 90
             implicitHeight: 90
-            radius: 13
+            radius: Appearance.liquidGlass.enabled ? Appearance.rounding.card : 13
             color: Appearance.colors.colLayer2
+            border.width: Appearance.liquidGlass.enabled ? 1 : 0
+            border.color: Appearance.liquidGlass.pillBorder
 
             MaterialSymbol {
                 anchors.centerIn: parent
@@ -156,10 +158,10 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.topMargin: 9
-                    height: 4
-                    radius: 2
-                    color: Appearance.colors.colLayer2
+                    anchors.topMargin: Appearance.liquidGlass.enabled ? 8 : 9
+                    height: Appearance.liquidGlass.enabled ? 6 : 4
+                    radius: height / 2
+                    color: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.sliderTrack : Appearance.colors.colLayer2
                     Rectangle {
                         height: parent.height
                         width: parent.width * root.progress

@@ -151,7 +151,8 @@ Scope {
         Item {
             id: dock
             readonly property int pad: 8
-            readonly property int sideMargin: 0
+            readonly property int sideMargin: Appearance.liquidGlass.enabled ? 12 : 0
+            readonly property int edgeMargin: Appearance.liquidGlass.enabled ? 12 : 0
             readonly property string dockEdge: root.isCenter
                 ? (root.isBottom ? "bottom" : "top")
                 : `${root.isBottom ? "bottom" : "top"}-${root.isLeft ? "left" : "right"}`
@@ -178,14 +179,17 @@ Scope {
             anchors.right: root.isRight ? parent.right : undefined
             anchors.left: root.isLeft ? parent.left : undefined
             anchors.horizontalCenter: root.isCenter ? parent.horizontalCenter : undefined
+            anchors.topMargin: root.isTop ? dock.edgeMargin : 0
+            anchors.bottomMargin: root.isBottom ? dock.edgeMargin : 0
             anchors.rightMargin: sideMargin
             anchors.leftMargin: sideMargin
 
             DockedRect {
                 anchors.fill: parent
                 edge: dock.dockEdge
-                cornerRadius: Appearance.rounding.verylarge
-                fillet: 12
+                floating: Appearance.liquidGlass.enabled
+                cornerRadius: Appearance.liquidGlass.enabled ? 28 : Appearance.rounding.verylarge
+                fillet: Appearance.liquidGlass.enabled ? 0 : 12
                 color: Appearance.colors.colPanelFrost
             }
 
@@ -307,8 +311,11 @@ Scope {
             implicitWidth: 30
             implicitHeight: 30
             buttonRadius: 15
-            colBackground: "transparent"
-            colBackgroundHover: Appearance.colors.colLayer1Hover
+            border: Appearance.liquidGlass.enabled
+            borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+            colBorder: action.active ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
+            colBackground: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : "transparent"
+            colBackgroundHover: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillHover : Appearance.colors.colLayer1Hover
             contentItem: MaterialSymbol {
                 anchors.centerIn: parent
                 text: action.glyph

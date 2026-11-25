@@ -221,6 +221,7 @@ Singleton {
 
 
             property JsonObject appearance: JsonObject {
+                property bool liquidGlass: true
                 property bool extraBackgroundTint: true
                 property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
                 // Tacit's own type everywhere (the owner's, 2026-10-16); the defaults named fonts Tacit does not ship

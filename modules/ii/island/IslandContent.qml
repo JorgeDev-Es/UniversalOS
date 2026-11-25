@@ -487,7 +487,7 @@ Item {
         blur: 34
         offset: Qt.vector2d(0, 14)
         color: ColorUtils.transparentize("black", 0.64)
-        visible: opacity > 0
+        visible: opacity > 0 && !background.floating
         opacity: root.open && root.view === "address" ? 1 : 0
         Behavior on opacity {
             Anim {
@@ -503,8 +503,9 @@ Item {
         id: background
         anchors.fill: parent
         visible: !GlobalStates.gridOver
+        floating: Appearance.liquidGlass.enabled && !root.holeOpen
         cornerRadius: root.radius
-        fillet: root.fillet
+        fillet: Appearance.liquidGlass.enabled && !root.holeOpen ? 0 : root.fillet
         // the sign-in's page window shows through here
         hole: root.holeRect
         holeRadius: 15

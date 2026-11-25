@@ -295,10 +295,10 @@ Item {
         root.focusIndex = -1;
     }
 
-    readonly property color colWash: ColorUtils.transparentize(Appearance.m3colors.m3onSurface, 0.88)
+    readonly property color colWash: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : ColorUtils.transparentize(Appearance.m3colors.m3onSurface, 0.88)
     // the program you are in, and the one whose windows the peek shows
-    readonly property color colWashLit: ColorUtils.transparentize(Appearance.m3colors.m3onSurface, 0.82)
-    readonly property color colSandWash: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.78)
+    readonly property color colWashLit: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillHover : ColorUtils.transparentize(Appearance.m3colors.m3onSurface, 0.82)
+    readonly property color colSandWash: Appearance.liquidGlass.enabled ? ColorUtils.transparentize(Appearance.colors.colPrimary, 0.72) : ColorUtils.transparentize(Appearance.colors.colPrimary, 0.78)
 
     // Inks by contrast: each state's ink is solved for APCA Lc on the ground it stands on (the dock's frost, the
     // wash, the brighter wash, the sand wash), so the steps hold on any palette. The panel inks are set for a darker
@@ -459,6 +459,8 @@ Item {
                 // closed programs bare, open ones on the wash ("on"), a step brighter where you are or peeked; pointed
                 // at, a closed one in sand
                 color: pill.hot ? root.colSandWash : pill.lit ? root.colWashLit : pill.open ? root.colWash : "transparent"
+                border.width: Appearance.liquidGlass.enabled && (pill.open || pill.hot) ? 1 : 0
+                border.color: pill.hot ? Appearance.liquidGlass.pillBorderActive : (pill.lit ? Appearance.liquidGlass.rimPrimary : Appearance.liquidGlass.pillBorder)
                 opacity: pill.swept
                 // sunk a little while pressed
                 scale: (0.92 + 0.08 * pill.swept) * (pillArea.pressed ? 0.95 : 1) * (pill.taking ? 1.08 : 1)
@@ -570,9 +572,9 @@ Item {
                     width: tagText.implicitWidth + 22
                     height: 28
                     radius: Tacit.radius.panel
-                    color: Appearance.m3colors.m3surfaceContainerHigh
+                    color: Appearance.liquidGlass.enabled ? Appearance.colors.colPanelFrost : Appearance.m3colors.m3surfaceContainerHigh
                     border.width: 1
-                    border.color: Tacit.hairline
+                    border.color: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillBorder : Tacit.hairline
                     opacity: 0
                     visible: opacity > 0
                     states: State { when: nameTag.wanted; PropertyChanges { nameTag.opacity: 1 } }

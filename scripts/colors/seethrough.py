@@ -14,12 +14,12 @@ from PIL import Image, ImageFilter
 STATE = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
 GENERATED = os.path.join(STATE, "quickshell/user/generated")
 
-# the designed see-through: foot.ini alpha 0.85, inactive_opacity 0.82, the frost (Appearance.colPanelFrost) at 0.76
-WINDOW, UNFOCUSED, FROST = 0.15, 0.18, 0.24
+# the designed see-through: foot.ini alpha 0.85, inactive_opacity 0.82, the Liquid Glass frost (Appearance.colPanelFrost) at 0.66
+WINDOW, UNFOCUSED, FROST = 0.15, 0.18, 0.34
 # the grounds' lightness (CIE L*) on dusk.jpg at those amounts, from the same model
 DUSK = {"window": 18.47, "unfocused": 26.70, "frost": 28.03}
-# the blur's own steps (hypr/tacit/general.lua): contrast 0.95, brightness 1.06
-BLUR_CONTRAST, BLUR_BRIGHTNESS = 0.95, 1.06
+# the blur's own steps (hypr/tacit/general.lua): contrast 1.02, brightness 1.12
+BLUR_CONTRAST, BLUR_BRIGHTNESS = 1.02, 1.12
 
 
 def linear(v):

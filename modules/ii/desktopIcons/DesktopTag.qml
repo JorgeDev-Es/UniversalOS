@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import qs.modules.common
+import qs.modules.common.widgets
 import Tacit.Kit as K
 
 /**
@@ -41,8 +42,19 @@ Item {
     Accessible.name: tag.ghost ? tag.name : tag.name + (tag.selected ? ", selected" : "")
 
     // the notch's frost (the compositor blurs what is under this window; see rules.lua)
+    LiquidGlassSurface {
+        anchors.fill: parent
+        visible: Appearance.liquidGlass.enabled && !tag.ghost
+        radius: tag.corner
+        color: Appearance.colors.colPanelFrost
+        interactive: false
+        shadowBlur: 14
+        shadowOffset: Qt.vector2d(0, 4)
+        rimColor: tag.selected ? Qt.alpha(Tacit.accent, 0.85) : Appearance.liquidGlass.rimPrimary
+    }
     Rectangle {
         anchors.fill: parent; radius: tag.corner
+        visible: !Appearance.liquidGlass.enabled || tag.ghost
         color: Appearance.colors.colPanelFrost
         border.width: 1
         border.color: tag.selected ? Qt.alpha(Tacit.accent, 0.85) : Qt.alpha(Tacit.inkMain, 0.10)

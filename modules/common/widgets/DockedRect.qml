@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
+import qs.modules.common
+import qs.modules.common.functions
 
 /**
  * A panel docked into a screen edge, drawn as ONE silhouette: the body with rounded corners
@@ -27,11 +29,22 @@ Item {
     property color color: "#1a1a1a"
     property color borderColor: "transparent"
     property real borderWidth: 0
+    property bool liquidGlass: Appearance.liquidGlass.enabled
+    property bool floating: false
+    property bool interactive: true
+    property bool shadowEnabled: true
     // A rounded hole through the body, in this item's frame (the sign-in's page window shows through it, under the
     // notch: IslandContent). Zero size: none.
     property rect hole: Qt.rect(0, 0, 0, 0)
     property real holeRadius: 16
     readonly property bool holed: root.hole.width > 0 && root.hole.height > 0
+    readonly property bool useFloatingGlass: root.floating && !root.holed && root.liquidGlass
+    readonly property real effectiveBorder: root.borderWidth > 0 ? root.borderWidth : (root.liquidGlass ? 1.35 : 0)
+
+    function withAlpha(c, a) {
+        const q = Qt.color(c);
+        return Qt.rgba(q.r, q.g, q.b, a);
+    }
 
     readonly property bool corner: root.edge.indexOf("-") > 0
     readonly property bool cornerTop: root.edge.startsWith("top")
@@ -106,14 +119,43 @@ Item {
         id: shape
         property string d: ""
         property color fill: "black"
+        property bool useGlassGrad: false
+        property bool isRim: false
         x: root.corner ? (root.cornerRight ? -root.fillet : 0) : (root.horizontal ? -root.fillet : 0)
         y: root.corner ? (root.cornerTop ? 0 : -root.fillet) : (root.horizontal ? 0 : -root.fillet)
         width: root.corner ? root.width + root.fillet : (root.horizontal ? root.width + root.fillet * 2 : root.width)
         height: root.corner ? root.height + root.fillet : (root.horizontal ? root.height : root.height + root.fillet * 2)
         preferredRendererType: Shape.CurveRenderer
 
+        property LinearGradient rimGrad: LinearGradient {
+            x1: 0
+            y1: 0
+            x2: shape.width
+            y2: shape.height
+            GradientStop { position: 0.0; color: Appearance.liquidGlass.rimPrimary }
+            GradientStop { position: 0.45; color: Appearance.liquidGlass.rimSecondary }
+            GradientStop { position: 1.0; color: Appearance.liquidGlass.rimCounter }
+        }
+
+        property LinearGradient bodyGrad: LinearGradient {
+            x1: 0
+            y1: 0
+            x2: 0
+            y2: shape.height
+            GradientStop {
+                position: 0.0
+                color: root.withAlpha(ColorUtils.mix(root.color, Appearance.m3colors.m3surfaceBright, 0.88), root.color.a)
+            }
+            GradientStop { position: 0.55; color: root.color }
+            GradientStop {
+                position: 1.0
+                color: root.withAlpha(ColorUtils.mix(root.color, Appearance.m3colors.m3surfaceContainerLowest, 0.92), root.color.a)
+            }
+        }
+
         ShapePath {
             fillColor: shape.fill
+            fillGradient: shape.useGlassGrad ? (shape.isRim ? shape.rimGrad : shape.bodyGrad) : null
             strokeWidth: -1
             fillRule: root.holed ? ShapePath.OddEvenFill : ShapePath.WindingFill
             pathHints: root.holed ? ShapePath.PathNonIntersecting : ShapePath.PathSolid | ShapePath.PathNonIntersecting
@@ -125,9 +167,21 @@ Item {
 
     readonly property real br: Math.min(root.cornerRadius, root.depth / 2, root.edgeLength / 2)
 
-    // Outer: the border colour.
+    LiquidGlassSurface {
+        anchors.fill: parent
+        visible: root.useFloatingGlass
+        color: root.color
+        radius: root.br
+        interactive: root.interactive
+        shadowEnabled: root.shadowEnabled
+    }
+
+    // Outer: the border colour or Liquid Glass directional specular rim.
     Silhouette {
-        fill: root.borderWidth > 0 ? root.borderColor : "transparent"
+        visible: !root.useFloatingGlass
+        isRim: true
+        useGlassGrad: root.liquidGlass && root.borderWidth === 0
+        fill: root.borderWidth > 0 ? root.borderColor : (root.liquidGlass ? Appearance.liquidGlass.rimPrimary : "transparent")
         d: root.corner
             ? root.cornerPathFor(root.width, root.height, root.fillet, root.br, 0)
             : root.pathFor(root.edgeLength, root.depth, root.fillet, root.br, 0)
@@ -135,7 +189,10 @@ Item {
 
     // Inner: the body, inset by the border on the free sides (never a docked edge).
     Silhouette {
-        readonly property real b: root.borderWidth
+        visible: !root.useFloatingGlass
+        isRim: false
+        useGlassGrad: root.liquidGlass
+        readonly property real b: root.effectiveBorder
         fill: root.color
         d: root.corner
             ? root.cornerPathFor(root.width - b, root.height - b, root.fillet, Math.max(0, root.br - b), b)

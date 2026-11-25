@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
@@ -30,14 +31,16 @@ Switch {
         width: parent.width
         height: parent.height
         radius: Appearance?.rounding.full ?? 9999
-        color: root.checked ? root.activeColor : root.inactiveColor
+        color: root.checked ? root.activeColor : (Appearance?.liquidGlass.enabled ? Appearance.liquidGlass.sliderTrack : root.inactiveColor)
 
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
             color: "transparent"
             border.width: 1
-            border.color: root.checked ? Qt.rgba(1, 1, 1, 0.06) : root.trackBorderOff
+            border.color: Appearance?.liquidGlass.enabled
+                ? (root.checked ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder)
+                : (root.checked ? Qt.rgba(1, 1, 1, 0.06) : root.trackBorderOff)
         }
 
         Behavior on color {
@@ -48,15 +51,23 @@ Switch {
     indicator: Rectangle {
         readonly property real thumbSize: 26 * root.scale
         readonly property real pad: 2 * root.scale
-        readonly property real stretchExtra: 4 * root.scale
+        readonly property real stretchExtra: (Appearance?.liquidGlass.enabled ? 8 : 4) * root.scale
+        readonly property bool stretched: root.pressed || root.down
 
-        width: (root.pressed || root.down)
+        width: stretched
             ? thumbSize + stretchExtra
             : thumbSize
         height: thumbSize
         radius: Appearance.rounding.full
 
-        color: root.checked ? root.thumbColor : root.thumbColorOff
+        color: {
+            const base = root.checked ? root.thumbColor : root.thumbColorOff;
+            return (Appearance?.liquidGlass.enabled && stretched)
+                ? ColorUtils.transparentize(base, 0.25)
+                : base;
+        }
+        border.width: Appearance?.liquidGlass.enabled ? 1 : 0
+        border.color: Appearance?.liquidGlass.enabled ? Appearance.liquidGlass.rimPrimary : "transparent"
 
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -70,7 +81,7 @@ Switch {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: root.checked
-            ? ((root.pressed || root.down)
+            ? (stretched
                 ? parent.width - width - pad - stretchExtra
                 : parent.width - width - pad)
             : pad

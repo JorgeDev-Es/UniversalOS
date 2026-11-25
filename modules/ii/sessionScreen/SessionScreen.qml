@@ -178,12 +178,14 @@ Scope {
             Item {
                 id: entranceWrapper
                 readonly property int cove: 12
-                readonly property real contentHeight: column.implicitHeight + 2 * 20 + cove
+                readonly property int edgePad: Appearance.liquidGlass.enabled ? 0 : cove
+                readonly property real contentHeight: column.implicitHeight + 2 * 20 + edgePad
                 anchors.right: parent.right
-                width: Appearance.sizes.sidebarWidth + cove
+                anchors.rightMargin: Appearance.liquidGlass.enabled ? 16 : 0
+                width: Appearance.sizes.sidebarWidth + edgePad
                 height: contentHeight
                 property real offsetScale: 1
-                y: parent.height - contentHeight + contentHeight * offsetScale
+                y: parent.height - contentHeight + contentHeight * offsetScale - (Appearance.liquidGlass.enabled ? 16 : 0)
                 Behavior on offsetScale {
                     Anim {}
                 }
@@ -197,8 +199,9 @@ Scope {
                 DockedRect {
                     anchors.fill: parent
                     edge: "bottom-right"
-                    cornerRadius: Appearance.rounding.verylarge
-                    fillet: entranceWrapper.cove
+                    floating: Appearance.liquidGlass.enabled
+                    cornerRadius: Appearance.liquidGlass.enabled ? 32 : Appearance.rounding.verylarge
+                    fillet: Appearance.liquidGlass.enabled ? 0 : entranceWrapper.cove
                     color: Appearance.colors.colPanelFrost
                 }
 
@@ -207,9 +210,9 @@ Scope {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.leftMargin: entranceWrapper.cove + 20
+                    anchors.leftMargin: entranceWrapper.edgePad + 20
                     anchors.rightMargin: 20
-                    anchors.topMargin: entranceWrapper.cove + 20
+                    anchors.topMargin: entranceWrapper.edgePad + 20
                     spacing: 18
 
                     RowLayout {
@@ -311,9 +314,14 @@ Scope {
                 // One action at a time: while the session is on its way out the rest go quiet.
                 enabled: sessionRoot.waitingFor.length === 0
                 buttonRadius: Appearance.rounding.full
-                colBackground: current ? Appearance.colors.colPrimary : Appearance.colors.colLayer2
+                border: Appearance.liquidGlass.enabled
+                borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+                colBorder: (current || hovered) ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
+                colBackground: current ? Appearance.colors.colPrimary : (Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : Appearance.colors.colLayer2)
                 colBackgroundHover: Appearance.colors.colPrimary
                 colRipple: Appearance.colors.colPrimaryActive
+                scale: big.down ? 0.92 : 1.0
+                Behavior on scale { Anim { type: Anim.FastSpatial } }
                 releaseAction: () => sessionRoot.activate(actionIndex)
                 contentItem: MaterialSymbol {
                     text: sessionRoot.actions[big.actionIndex].icon

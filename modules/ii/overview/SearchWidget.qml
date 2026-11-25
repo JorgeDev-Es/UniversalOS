@@ -123,7 +123,7 @@ Item {
     readonly property int dockCornerSize: 12
 
     implicitWidth: root.dockMaxWidth + root.dockCornerSize * 2
-    implicitHeight: frame.height + peekTab.height
+    implicitHeight: frame.height + (Appearance.liquidGlass.enabled ? 12 : 0) + peekTab.height + (Appearance.liquidGlass.enabled && peekTab.visible ? 10 : 0)
 
     // Out of the bottom edge as one piece, like the control panel (SidebarRight.qml): one scalar,
     // the default spatial Anim both ways, no fade - Hyprland blurs only pixels above ignore_alpha,
@@ -136,7 +136,7 @@ Item {
     property bool armed: false
     property real offsetScale: !root.out && root.armed ? 0 : 1
     transform: Translate {
-        y: (root.implicitHeight + 16) * root.offsetScale
+        y: (root.implicitHeight + 24) * root.offsetScale
     }
     // the direction is read from the state, not from offsetScale itself, so it holds for the whole slide
     readonly property bool showing: !root.out && root.armed
@@ -656,6 +656,7 @@ Item {
         width: peekTab.slabWidth
         height: peekTab.slabHeight
         anchors.bottom: frame.top
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 10 : 0
         visible: peekTab.slabHeight > 0.5
 
         readonly property real pillLeft: frame.x + dock.x + dock.peekPill.x
@@ -762,9 +763,10 @@ Item {
         DockedRect {
             anchors.fill: parent
             edge: "bottom"
-            cornerRadius: peekTab.corner
-            fillet: 12
-            color: ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainerHigh, 0.08)
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 24 : peekTab.corner
+            fillet: Appearance.liquidGlass.enabled ? 0 : 12
+            color: Appearance.liquidGlass.enabled ? Appearance.colors.colPanelFrost : ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainerHigh, 0.08)
         }
         // uncovered as the slab grows, centred in it (the slab itself does not clip: its coves reach past its sides)
         Item {
@@ -925,14 +927,16 @@ Item {
     DockedRect {
         anchors.fill: frame
         edge: "bottom"
-        cornerRadius: Appearance.rounding.verylarge
-        fillet: root.dockCornerSize
-        color: ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainerHigh, 0.08)
+        floating: Appearance.liquidGlass.enabled
+        cornerRadius: Appearance.liquidGlass.enabled ? 30 : Appearance.rounding.verylarge
+        fillet: Appearance.liquidGlass.enabled ? 0 : root.dockCornerSize
+        color: Appearance.liquidGlass.enabled ? Appearance.colors.colPanelFrost : ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainerHigh, 0.08)
     }
 
     Item {
         id: frame
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 12 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         // The dock's width, widened into the search's on the notch's quick curve, and back on its close;
         // kept as it is while the shape slides away (it jumped to the search's width as the dock left)
@@ -1009,8 +1013,10 @@ Item {
                 width: resultsList.width - 20
                 y: -(Math.max(0, root.chosen) + 1) * root.rowHeight
                 height: root.rowHeight
-                radius: 17
+                radius: Appearance.liquidGlass.enabled ? 18 : 17
                 color: root.colWash
+                border.width: Appearance.liquidGlass.enabled ? 1 : 0
+                border.color: Appearance.liquidGlass.pillBorder
                 // the short emphasized curve: an arrow held down hops row after row
                 Behavior on y {
                     enabled: root.settled && !root.rowsChanging
@@ -1082,6 +1088,8 @@ Item {
                     onClicked: root.searchRequested()
                 }
                 color: disc.quiet ? root.colWash : Appearance.colors.colPrimary
+                border.width: Appearance.liquidGlass.enabled ? 1 : 0
+                border.color: disc.quiet ? Appearance.liquidGlass.pillBorder : Appearance.liquidGlass.pillBorderActive
                 Behavior on color {
                     animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                 }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
 import Quickshell.Services.Mpris
 import qs
@@ -138,14 +139,16 @@ MouseArea {
     Item {
         id: notch
         anchors.top: parent.top
+        anchors.topMargin: Appearance.liquidGlass.enabled ? 10 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         width: 108 + (root.lockGlyph !== "" ? 30 : 0)
         height: 34
         DockedRect {
             anchors.fill: parent
             edge: "top"
-            cornerRadius: 14
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 17 : 14
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
         Row {
@@ -171,117 +174,168 @@ MouseArea {
     // ------------------------------------------------------------ clock, date, now, away
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.22
+        y: parent.height * (Appearance.liquidGlass.enabled ? 0.19 : 0.22)
         spacing: 6
         opacity: root.entrance
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-            text: DateTime.time
-            font.family: Appearance.font.family.numbers
-            font.pixelSize: 96
-            color: Appearance.colors.colOnSurface
+            visible: Appearance.liquidGlass.enabled
+            text: Qt.formatDate(DateTime.clock.date, "dddd d MMMM")
+            font.pixelSize: 19
+            font.weight: Font.Medium
+            color: Tacit.inkSec
         }
         StyledText {
             Layout.alignment: Qt.AlignHCenter
+            text: DateTime.time
+            font.family: Appearance.font.family.numbers
+            font.pixelSize: 96
+            font.weight: Appearance.liquidGlass.enabled ? Font.DemiBold : Font.Normal
+            color: Appearance.liquidGlass.enabled ? ColorUtils.transparentize(Tacit.inkMain, 0.12) : Appearance.colors.colOnSurface
+            layer.enabled: Appearance.liquidGlass.enabled
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Appearance.liquidGlass.shadow
+                shadowBlur: 0.45
+                shadowVerticalOffset: 4
+            }
+        }
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter
+            visible: !Appearance.liquidGlass.enabled
             text: Qt.formatDate(DateTime.clock.date, "dddd d MMMM")
             font.pixelSize: 19
             color: Appearance.colors.colSubtext
         }
 
         Item {
-            Layout.preferredHeight: 28
+            Layout.preferredHeight: 24
         }
 
-        // Now playing: art and one line, only while the notch would show a player.
-        RowLayout {
+        // Now playing: wrapped in a floating Liquid Glass capsule card when Liquid Glass is active.
+        Item {
             Layout.alignment: Qt.AlignHCenter
             visible: root.hasMedia && Config.options.lock.showMedia
-            spacing: 12
-            Rectangle {
-                implicitWidth: 44
-                implicitHeight: 44
-                radius: 12
-                color: Appearance.colors.colLayer2
-                clip: true
-                StyledImage {
-                    anchors.fill: parent
-                    source: root.player?.trackArtUrl ?? ""
-                    fillMode: Image.PreserveAspectCrop
-                    layer.enabled: true
-                    layer.effect: OpacityMask {
-                        maskSource: Rectangle {
-                            width: 44
-                            height: 44
-                            radius: 12
+            readonly property int pad: Appearance.liquidGlass.enabled ? 16 : 0
+            implicitWidth: mediaCol.implicitWidth + pad * 2
+            implicitHeight: mediaCol.implicitHeight + pad * 2
+
+            LiquidGlassSurface {
+                anchors.fill: parent
+                visible: Appearance.liquidGlass.enabled
+                radius: 26
+                color: Appearance.colors.colPanelFrost
+            }
+
+            ColumnLayout {
+                id: mediaCol
+                anchors.centerIn: parent
+                spacing: 10
+
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 12
+                    Rectangle {
+                        implicitWidth: 44
+                        implicitHeight: 44
+                        radius: 12
+                        color: Appearance.colors.colLayer2
+                        clip: true
+                        StyledImage {
+                            anchors.fill: parent
+                            source: root.player?.trackArtUrl ?? ""
+                            fillMode: Image.PreserveAspectCrop
+                            layer.enabled: true
+                            layer.effect: OpacityMask {
+                                maskSource: Rectangle {
+                                    width: 44
+                                    height: 44
+                                    radius: 12
+                                }
+                            }
+                        }
+                    }
+                    ColumnLayout {
+                        spacing: 2
+                        StyledText {
+                            text: root.player?.trackTitle ?? ""
+                            font.pixelSize: 16
+                            color: Appearance.colors.colOnSurface
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: 420
+                        }
+                        StyledText {
+                            text: `${root.player?.trackArtist ?? ""} · ${MprisController.isPlaying ? Translation.tr("playing") : Translation.tr("paused")}`
+                            font.pixelSize: 15
+                            color: Appearance.colors.colSubtext
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: 420
                         }
                     }
                 }
-            }
-            ColumnLayout {
-                spacing: 2
-                StyledText {
-                    text: root.player?.trackTitle ?? ""
-                    font.pixelSize: 16
-                    color: Appearance.colors.colOnSurface
-                    elide: Text.ElideRight
-                    Layout.maximumWidth: 420
-                }
-                StyledText {
-                    text: `${root.player?.trackArtist ?? ""} · ${MprisController.isPlaying ? Translation.tr("playing") : Translation.tr("paused")}`
-                    font.pixelSize: 15
-                    color: Appearance.colors.colSubtext
-                    elide: Text.ElideRight
-                    Layout.maximumWidth: 420
+
+                Row {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 10
+                    Disc {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        glyph: "skip_previous"
+                        enabled: MprisController.canGoPrevious
+                        onActivated: MprisController.previous()
+                    }
+                    Disc {
+                        implicitWidth: 40
+                        implicitHeight: 40
+                        glyph: MprisController.isPlaying ? "pause" : "play_arrow"
+                        filled: true
+                        onActivated: MprisController.togglePlaying()
+                    }
+                    Disc {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        glyph: "skip_next"
+                        enabled: MprisController.canGoNext
+                        onActivated: MprisController.next()
+                    }
                 }
             }
         }
 
-        Row {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 6
-            visible: root.hasMedia && Config.options.lock.showMedia
-            spacing: 10
-            Disc {
-                implicitWidth: 36
-                implicitHeight: 36
-                glyph: "skip_previous"
-                enabled: MprisController.canGoPrevious
-                onActivated: MprisController.previous()
-            }
-            Disc {
-                implicitWidth: 40
-                implicitHeight: 40
-                glyph: MprisController.isPlaying ? "pause" : "play_arrow"
-                filled: true
-                onActivated: MprisController.togglePlaying()
-            }
-            Disc {
-                implicitWidth: 36
-                implicitHeight: 36
-                glyph: "skip_next"
-                enabled: MprisController.canGoNext
-                onActivated: MprisController.next()
-            }
-        }
-
-        StyledText {
+        Item {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 10
             visible: Notifications.unread > 0
-            // which apps and how many, never what they say: whoever is in front of the locked laptop reads this
-            // (owner, 2026-10-09: "app and count only")
-            text: {
-                const n = Notifications.unread;
-                const head = n === 1 ? Translation.tr("1 notification while you were away")
-                    : Translation.tr("%1 notifications while you were away").arg(n);
-                const apps = [...new Set(Notifications.list.slice(-n).reverse().map(x => x.appName).filter(a => a))];
-                if (!apps.length)
-                    return head;
-                return `${head} · ${apps.slice(0, 3).join(", ")}${apps.length > 3 ? Translation.tr(" and %1 more").arg(apps.length - 3) : ""}`;
+            readonly property int hPad: Appearance.liquidGlass.enabled ? 16 : 0
+            readonly property int vPad: Appearance.liquidGlass.enabled ? 8 : 0
+            implicitWidth: unreadLabel.implicitWidth + hPad * 2
+            implicitHeight: unreadLabel.implicitHeight + vPad * 2
+
+            LiquidGlassSurface {
+                anchors.fill: parent
+                visible: Appearance.liquidGlass.enabled
+                radius: height / 2
+                color: Appearance.colors.colPanelFrost
             }
-            font.pixelSize: 16
-            color: Appearance.colors.colSubtext
+
+            StyledText {
+                id: unreadLabel
+                anchors.centerIn: parent
+                // which apps and how many, never what they say: whoever is in front of the locked laptop reads this
+                // (owner, 2026-10-09: "app and count only")
+                text: {
+                    const n = Notifications.unread;
+                    const head = n === 1 ? Translation.tr("1 notification while you were away")
+                        : Translation.tr("%1 notifications while you were away").arg(n);
+                    const apps = [...new Set(Notifications.list.slice(-n).reverse().map(x => x.appName).filter(a => a))];
+                    if (!apps.length)
+                        return head;
+                    return `${head} · ${apps.slice(0, 3).join(", ")}${apps.length > 3 ? Translation.tr(" and %1 more").arg(apps.length - 3) : ""}`;
+                }
+                font.pixelSize: 16
+                color: Appearance.liquidGlass.enabled ? Tacit.inkSec : Appearance.colors.colSubtext
+            }
         }
     }
 
@@ -326,16 +380,17 @@ MouseArea {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         width: 420
-        height: 58 + 6
+        height: Appearance.liquidGlass.enabled ? 58 : 58 + 6
         y: 0
-        anchors.bottomMargin: -6 * (1 - root.entrance)
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 24 - 12 * (1 - root.entrance) : -6 * (1 - root.entrance)
         opacity: root.entrance
 
         DockedRect {
             anchors.fill: parent
             edge: "bottom"
-            cornerRadius: 23
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 29 : 23
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
 
@@ -457,26 +512,30 @@ MouseArea {
     // The session panel's discs, in its corner: hover turns them white, exactly as there.
     Item {
         id: powerPanel
+        readonly property int pad: Appearance.liquidGlass.enabled ? 14 : 20
+        readonly property int edgeInset: Appearance.liquidGlass.enabled ? 0 : 6
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        width: 3 * 44 + 2 * 16 + 2 * 20 + 6
-        height: 44 + 2 * 20 + 6
-        anchors.bottomMargin: -12 * (1 - root.entrance)
+        anchors.rightMargin: Appearance.liquidGlass.enabled ? 20 : 0
+        width: 3 * 44 + 2 * 16 + 2 * pad + edgeInset
+        height: 44 + 2 * pad + edgeInset
+        anchors.bottomMargin: Appearance.liquidGlass.enabled ? 20 - 12 * (1 - root.entrance) : -12 * (1 - root.entrance)
         opacity: root.entrance
 
         DockedRect {
             anchors.fill: parent
             edge: "bottom-right"
-            cornerRadius: Appearance.rounding.verylarge
-            fillet: 6
+            floating: Appearance.liquidGlass.enabled
+            cornerRadius: Appearance.liquidGlass.enabled ? 30 : Appearance.rounding.verylarge
+            fillet: Appearance.liquidGlass.enabled ? 0 : 6
             color: Appearance.colors.colPanelFrost
         }
 
         Row {
             anchors.left: parent.left
             anchors.top: parent.top
-            anchors.leftMargin: 6 + 20
-            anchors.topMargin: 6 + 20
+            anchors.leftMargin: powerPanel.edgeInset + powerPanel.pad
+            anchors.topMargin: powerPanel.edgeInset + powerPanel.pad
             spacing: 16
 
             Disc {
@@ -516,9 +575,14 @@ MouseArea {
         implicitHeight: 44
         padding: 0
         buttonRadius: Appearance.rounding.full
-        colBackground: filled ? Appearance.colors.colPrimary : Appearance.colors.colLayer2
+        border: Appearance.liquidGlass.enabled
+        borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+        colBorder: (filled || hovered) ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
+        colBackground: filled ? Appearance.colors.colPrimary : (Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : Appearance.colors.colLayer2)
         colBackgroundHover: Appearance.colors.colPrimary
         colRipple: Appearance.colors.colPrimaryActive
+        scale: disc.down ? 0.92 : 1.0
+        Behavior on scale { Anim { type: Anim.FastSpatial } }
         releaseAction: () => disc.activated()
         contentItem: MaterialSymbol {
             text: disc.checking ? "progress_activity" : disc.glyph

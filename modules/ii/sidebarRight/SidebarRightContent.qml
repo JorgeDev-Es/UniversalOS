@@ -341,10 +341,10 @@ Item {
     // Pills are raised the way the rules want (Tacit.qml): ink *mixed* over the ground —
     // "on" at the raised slab (11 %), "off" at a fainter mix of the same two, no
     // transparency anywhere (text ranked by brightness, never by opacity).
-    readonly property color colPillOn: Tacit.raised
-    readonly property color colPillOnHover: Tacit.raisedHot
-    readonly property color colPillOff: ColorUtils.mix(Tacit.inkMain, Tacit.ground, 0.05)
-    readonly property color colPillOffHover: ColorUtils.mix(Tacit.inkMain, Tacit.ground, 0.07)
+    readonly property color colPillOn: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillActive : Tacit.raised
+    readonly property color colPillOnHover: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillActiveHover : Tacit.raisedHot
+    readonly property color colPillOff: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFill : ColorUtils.mix(Tacit.inkMain, Tacit.ground, 0.05)
+    readonly property color colPillOffHover: Appearance.liquidGlass.enabled ? Appearance.liquidGlass.pillFillHover : ColorUtils.mix(Tacit.inkMain, Tacit.ground, 0.07)
     property real maxHeight: 700
     // The toggles block is the panel's measure: seven height.action cells — six
     // secondaries in the row with the dots as the seventh — close it; the primary
@@ -419,8 +419,9 @@ Item {
                 id: dockedBg
                 anchors.fill: parent
                 edge: "bottom-right"
-                cornerRadius: sidebarRightBackground.radius
-                fillet: 12
+                floating: Appearance.liquidGlass.enabled
+                cornerRadius: Appearance.liquidGlass.enabled ? 32 : sidebarRightBackground.radius
+                fillet: Appearance.liquidGlass.enabled ? 0 : 12
                 // The rule's own role: a shell surface that floats over apps is the frost.
                 color: Appearance.colors.colPanelFrost
             }
@@ -571,16 +572,22 @@ Item {
                                 implicitWidth: Kit.tokens.height.action
                                 implicitHeight: Kit.tokens.height.action
                                 buttonRadius: width / 2
-                                borderWidth: 0
+                                border: Appearance.liquidGlass.enabled
+                                borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+                                colBorder: root.drawerOpen ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
                                 toggled: root.drawerOpen
+                                colBackground: root.colPillOff
+                                colBackgroundHover: root.colPillOffHover
                                 colBackgroundToggled: root.colPillOn
                                 colBackgroundToggledHover: root.colPillOnHover
+                                scale: down ? 0.91 : 1.0
+                                Behavior on scale { Anim { type: Anim.FastSpatial } }
                                 onClicked: root.drawerOpen = !root.drawerOpen
                                 contentItem: Symbol {
                                     anchors.centerIn: parent
                                     text: root.drawerOpen ? "expand_less" : "more_horiz"
                                     size: Kit.tokens.icon.nav
-                                    color: Tacit.inkMain
+                                    color: (root.drawerOpen && Appearance.liquidGlass.enabled) ? Tacit.inkOnAccent : Tacit.inkMain
                                 }
                                 FocusRing {
                                     shown: parent.keyboardFocus
@@ -664,7 +671,9 @@ Item {
                                 implicitWidth: editWords.implicitWidth + Kit.tokens.space.m * 2
                                 implicitHeight: Kit.tokens.height.railRow
                                 buttonRadius: height / 2
-                                borderWidth: 0
+                                border: Appearance.liquidGlass.enabled
+                                borderWidth: Appearance.liquidGlass.enabled ? 1 : 0
+                                colBorder: root.editMode ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
                                 toggled: root.editMode
                                 colBackground: root.colPillOff
                                 colBackgroundHover: root.colPillOffHover
@@ -675,7 +684,7 @@ Item {
                                 contentItem: StyledText {
                                     id: editWords
                                     text: root.editMode ? Translation.tr("Done") : Translation.tr("Edit")
-                                    color: Tacit.inkMain
+                                    color: (root.editMode && Appearance.liquidGlass.enabled) ? Tacit.inkOnAccent : Tacit.inkMain
                                 }
                                 FocusRing {
                                     shown: parent.keyboardFocus
@@ -882,13 +891,22 @@ Item {
                 y: submenuLayer.active ? submenuLayer.cardY : submenuLayer.cardY - Kit.tokens.space.m
                 width: root.togglesWidth
                 height: submenuColumn.implicitHeight + root.sidebarPadding * 2
-                radius: Kit.tokens.radius.panel
+                radius: Appearance.liquidGlass.enabled ? 24 : Kit.tokens.radius.panel
                 // The card is the panel's own ground, solid: the same role the
                 // panel's frost is made of (colLayer3Base) without the
                 // see-through, so the contents the card floats over stay behind it.
                 // No shadow lifts it, no scrim dims what is behind; the panel keeps
                 // its silhouette and the card its place.
-                color: Appearance.colors.colLayer3Base
+                color: Appearance.liquidGlass.enabled ? "transparent" : Appearance.colors.colLayer3Base
+
+                LiquidGlassSurface {
+                    anchors.fill: parent
+                    visible: Appearance.liquidGlass.enabled
+                    radius: submenuCard.radius
+                    color: ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainerHigh, 0.10)
+                    shadowBlur: 20
+                    shadowOffset: Qt.vector2d(0, 6)
+                }
 
                 Behavior on y {
                     NumberAnimation {
@@ -1056,6 +1074,7 @@ Item {
 
     // One-line slider: the pill's glyph on the left and the kit's own Slider for the
     // bar (its keyboard comes free) and the value as a word at the right.
+    // In iOS 27 Liquid Glass mode, renders as a 38px tactile glass capsule slider.
     component LineSlider: RowLayout {
         id: line
         property string glyph: "tune"
@@ -1066,16 +1085,141 @@ Item {
         spacing: Kit.tokens.space.s
 
         Symbol {
+            visible: !Appearance.liquidGlass.enabled
             text: line.glyph
             size: Kit.tokens.icon.row
             color: Tacit.inkMain
         }
         Slider {
             id: slider
+            visible: !Appearance.liquidGlass.enabled
             Layout.fillWidth: true
             label: line.label
             word: `${Math.round(value * 100)}%`
             onMoved: v => line.moved(v)
+        }
+
+        Item {
+            id: glassCapsule
+            visible: Appearance.liquidGlass.enabled
+            Layout.fillWidth: true
+            implicitHeight: 38
+            activeFocusOnTab: true
+            readonly property bool keyboardFocus: glassCapsule.activeFocus
+                && (glassCapsule.focusReason === Qt.TabFocusReason
+                    || glassCapsule.focusReason === Qt.BacktabFocusReason
+                    || glassCapsule.focusReason === Qt.ShortcutFocusReason)
+            readonly property real clamped: Math.max(0, Math.min(1, line.value))
+            readonly property real fillWidth: height + (width - height) * clamped
+
+            Accessible.role: Accessible.Slider
+            Accessible.name: line.label
+
+            scale: glassDragArea.pressed ? 0.985 : 1.0
+            Behavior on scale {
+                Anim {
+                    type: Anim.FastSpatial
+                }
+            }
+
+            Keys.onPressed: event => {
+                Kit.focusVisible = true;
+                if (event.key === Qt.Key_Left || event.key === Qt.Key_Down) {
+                    line.moved(Math.max(0, glassCapsule.clamped - 0.05));
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Up) {
+                    line.moved(Math.min(1, glassCapsule.clamped + 0.05));
+                    event.accepted = true;
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: height / 2
+                color: Appearance.liquidGlass.sliderTrack
+                border.width: 1
+                border.color: glassDragArea.containsMouse ? Appearance.liquidGlass.rimPrimary : Appearance.liquidGlass.pillBorder
+            }
+
+            Rectangle {
+                id: glassFill
+                x: 0
+                y: 0
+                height: parent.height
+                width: glassCapsule.fillWidth
+                radius: height / 2
+                color: Appearance.liquidGlass.sliderFill
+
+                Behavior on width {
+                    enabled: !glassDragArea.pressed
+                    SmoothedAnimation {
+                        velocity: Appearance.animation.elementMoveFast.velocity
+                    }
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.leftMargin: parent.height * 0.35
+                    anchors.rightMargin: parent.height * 0.35
+                    anchors.topMargin: 1
+                    height: 1
+                    color: Appearance.liquidGlass.innerGlow
+                }
+            }
+
+            Item {
+                width: glassCapsule.height
+                height: glassCapsule.height
+                Symbol {
+                    anchors.centerIn: parent
+                    text: line.glyph
+                    size: Kit.tokens.icon.row
+                    color: Appearance.m3colors.m3surfaceContainerLowest
+                }
+            }
+
+            StyledText {
+                anchors.right: parent.right
+                anchors.rightMargin: 14
+                anchors.verticalCenter: parent.verticalCenter
+                text: `${Math.round(glassCapsule.clamped * 100)}%`
+                font.family: Appearance.font.family.numbers
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                font.weight: Font.Medium
+                color: glassCapsule.fillWidth > glassCapsule.width - 48
+                    ? Appearance.m3colors.m3surfaceContainerLowest
+                    : Tacit.inkMain
+            }
+
+            FocusRing {
+                shown: glassCapsule.keyboardFocus
+                corner: glassCapsule.height / 2
+            }
+
+            MouseArea {
+                id: glassDragArea
+                anchors.fill: parent
+                hoverEnabled: true
+                preventStealing: true
+                cursorShape: pressed ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+                function pushX(mx) {
+                    const span = Math.max(1, width - height);
+                    const v = Math.max(0, Math.min(1, (mx - height * 0.5) / span));
+                    line.moved(v);
+                }
+                onPressed: mouse => pushX(mouse.x)
+                onPositionChanged: mouse => {
+                    if (pressed)
+                        pushX(mouse.x);
+                }
+                onWheel: wheel => {
+                    const step = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
+                    line.moved(Math.max(0, Math.min(1, glassCapsule.clamped + step)));
+                    wheel.accepted = true;
+                }
+            }
         }
     }
 
@@ -1153,13 +1297,17 @@ Item {
         implicitWidth: Kit.tokens.height.action
         implicitHeight: Kit.tokens.height.action
         buttonRadius: width / 2
-        borderWidth: 0 // the kit's FocusRing draws the keyboard ring
+        border: Appearance.liquidGlass.enabled
+        borderWidth: Appearance.liquidGlass.enabled ? 1 : 0 // the kit's FocusRing draws the keyboard ring
+        colBorder: pill.toggled ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
         toggled: pill.model?.toggled ?? false
         enabled: pill.editMode || pill.dialog.length > 0 || pill.inDrawer
             || (pill.model?.available ?? false) || !!pill.model?.altAction
         // Being carried draws the pill out (the ghost carries its shape); state drives
         // it, not an imperative restore, so a stolen grab heals too.
         opacity: root.dragging && root.dragTarget === pill.pillId ? 0.3 : 1
+        scale: pill.down ? 0.91 : 1.0
+        Behavior on scale { Anim { type: Anim.FastSpatial } }
         colBackground: root.colPillOff
         colBackgroundHover: root.colPillOffHover
         colBackgroundToggled: root.colPillOn
@@ -1191,7 +1339,7 @@ Item {
             // (the kit's accent is a mark, and an active pill is not a mark).
             // Unavailable (the service behind is not) fades to the faint ink, not
             // opacity: text is quieter by ink, never by transparency.
-            color: !pill.enabled ? Tacit.inkFaint : Tacit.inkSec
+            color: !pill.enabled ? Tacit.inkFaint : (pill.toggled && Appearance.liquidGlass.enabled ? Tacit.inkOnAccent : Tacit.inkSec)
         }
         FocusRing {
             shown: pill.keyboardFocus
@@ -1275,11 +1423,15 @@ Item {
 
         implicitWidth: (root.togglesWidth - Kit.tokens.space.s) / 2
         implicitHeight: Kit.tokens.height.action + Kit.tokens.space.l
-        buttonRadius: Kit.tokens.radius.slab
-        borderWidth: 0 // the kit's FocusRing draws the keyboard ring
+        buttonRadius: Appearance.liquidGlass.enabled ? 22 : Kit.tokens.radius.slab
+        border: Appearance.liquidGlass.enabled
+        borderWidth: Appearance.liquidGlass.enabled ? 1 : 0 // the kit's FocusRing draws the keyboard ring
+        colBorder: primary.toggled ? Appearance.liquidGlass.pillBorderActive : Appearance.liquidGlass.pillBorder
         toggled: primary.model?.toggled ?? false
         enabled: primary.editMode || (primary.model?.available ?? false) || primary.dialog.length > 0
         opacity: root.dragging && root.dragTarget === primary.pillId ? 0.3 : 1
+        scale: primary.down ? 0.96 : 1.0
+        Behavior on scale { Anim { type: Anim.FastSpatial } }
         colBackground: root.colPillOff
         colBackgroundHover: root.colPillOffHover
         colBackgroundToggled: root.colPillOn
@@ -1309,7 +1461,7 @@ Item {
                 filled: primary.toggled
                 size: Kit.tokens.icon.row
                 // One signal: the wash, not a colour change on the glyph.
-                color: Tacit.inkSec
+                color: (primary.toggled && Appearance.liquidGlass.enabled) ? Tacit.inkOnAccent : Tacit.inkSec
             }
             // The name on its own line and the state under it, one ink level quieter: the
             // two never share a line, so neither is cut for the other. A toggle with no state
@@ -1323,7 +1475,7 @@ Item {
                     width: parent.width
                     elide: Text.ElideRight
                     text: primary.model?.name ?? ""
-                    color: Tacit.inkMain
+                    color: (primary.toggled && Appearance.liquidGlass.enabled) ? Tacit.inkOnAccent : Tacit.inkMain
                 }
                 StyledText {
                     visible: primaryText.state.length > 0
@@ -1336,13 +1488,13 @@ Item {
                     lineHeight: 0.9
                     text: primaryText.state
                     font.pixelSize: Appearance.font.pixelSize.tiny
-                    color: Tacit.inkSec
+                    color: (primary.toggled && Appearance.liquidGlass.enabled) ? Tacit.inkOnAccent : Tacit.inkSec
                 }
             }
         }
         FocusRing {
             shown: primary.keyboardFocus
-            corner: Kit.tokens.radius.slab
+            corner: primary.buttonRadius
         }
         StyledToolTip {
             text: primary.editMode ? Translation.tr("Drag to its place") : ((primary.model?.name ?? "") + (primary.dialog.length > 0 ? Translation.tr("\nRight-click to turn on/off") : ""))
