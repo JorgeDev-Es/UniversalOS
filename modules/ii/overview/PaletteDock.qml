@@ -532,14 +532,15 @@ Item {
                         IconImage {
                             id: appIcon
                             anchors.centerIn: parent
-                            visible: pill.symbol.length === 0 && mark.iconPath.length > 0
-                            source: visible ? mark.iconPath : ""
+                            visible: pill.symbol.length === 0 && mark.iconPath.length > 0 && appIcon.status !== Image.Error
+                            // Unload while the dock is hidden so suspend/DPMS cannot leave a stale or dead texture cached
+                            source: pill.symbol.length === 0 && mark.iconPath.length > 0 && root.visible ? mark.iconPath : ""
                             implicitSize: 24
                         }
-                        // no icon to be found: the program's initial, not an empty tile
+                        // no icon to be found (or failed to load): the program's initial, not an empty tile
                         StyledText {
                             anchors.centerIn: parent
-                            visible: pill.symbol.length === 0 && mark.iconPath.length === 0
+                            visible: pill.symbol.length === 0 && (mark.iconPath.length === 0 || appIcon.status === Image.Error)
                             text: root.nameFor(pill.appId).charAt(0).toUpperCase()
                             font.pixelSize: Tacit.size.row
                             font.weight: Font.DemiBold
